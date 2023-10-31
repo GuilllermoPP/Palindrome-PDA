@@ -11,21 +11,33 @@ class PDAGraphicalInterface:
         # Create a PDA instance
         self.pda = PDA()
 
-        # Create a Canvas for drawing the PDA diagram
+        # Create an Entry for input
+        self.input_entry = tk.Entry(self.master)
+        self.input_entry.pack()
+
+        self.result_label = tk.Label(master, text="")
+        self.result_label.pack()
+
+        # Create a Button to trigger PDA evaluation
         self.evaluate_button = tk.Button(self.master, text="Evaluate", command=self.evaluate_input)
         self.evaluate_button.pack()
+
+        # Create a Canvas for drawing the PDA diagram
         self.canvas = Canvas(self.master, width=800, height=600)
         self.canvas.pack()
 
-        # Create a button to trigger PDA evaluation
+        self.visualize_pda()
         
 
     def evaluate_input(self):
-        input_string = "abba"  # Replace this with your input string
+        input_string = self.input_entry.get()  # Get input from the Entry
         result = self.pda.is_even_palindrome(input_string)
-
+        self.result_label.config(text=result)
+        self.pda.reset()
         # Visualize the PDA state, stack, and symbols here
         self.visualize_pda()
+
+    # ... Rest of the code remains unchanged ...
 
     def visualize_pda(self):
         # Clear the canvas before redrawing
@@ -41,7 +53,7 @@ class PDAGraphicalInterface:
         for transition, destination in self.pda.transitions.items():
             current_state, symbol, stack_symbol = transition
             new_state, push_symbols = destination
-            self.draw_transition(current_state, new_state, f"{symbol}, {stack_symbol} -> {''.join(push_symbols)}")
+            self.draw_transition(current_state, new_state, f"{symbol if symbol!=''else 'λ'}, {stack_symbol} -> {''.join(push_symbols if push_symbols!=''else 'λ' )}")
 
         self.master.mainloop()
 
