@@ -5,7 +5,7 @@ class PDA:
         self.stack_alphabet = {'#', 'A', 'B'}
         self.transitions = {
             ('q0', 'a', '#'): ('q0', '#A'),
-            ('q0', 'b', '#'): ('q0', '#B'), 
+            ('q0', 'b', '#'): ('q0', '#B'),
             ('q0', 'b', 'B'): ('q0', 'BB'),
             ('q0', 'a', 'A'): ('q0', 'AA'),
             ('q0', 'a', 'B'): ('q0', 'BA'),
@@ -44,13 +44,14 @@ class PDA:
             if i == half_length -1: 
                 self.transition('')
                 
+                
             
         if self.stack[-1]=='#' and self.current_state == 'q1':
             self.transition('')
 
         return self.current_state == self.accept_state
-
-        def reset(self):
+    
+    def reset(self):
         """
         Reinicia los estados del autómata a su estado inicial.
         """
