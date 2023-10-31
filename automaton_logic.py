@@ -18,13 +18,14 @@ class PDA:
         }
         self.initial_state = 'q0'
         self.accept_state = 'q2'
+        self.current_state= self.initial_state 
         self.stack = ['#']
         self.history = []
 
     def transition(self, symbol):
-        current_state = self.current_state
-        if (current_state, symbol, self.stack[-1]) in self.transitions:
-            new_state, push_symbols = self.transitions[(current_state, symbol, self.stack[-1])]
+        
+        if (self.current_state, symbol, self.stack[-1]) in self.transitions:
+            new_state, push_symbols = self.transitions[(self.current_state, symbol, self.stack[-1])]
             self.stack.pop()
             self.stack.extend(push_symbols)
             self.current_state = new_state
@@ -59,3 +60,6 @@ class PDA:
         self.stack = ['#']
         self.history = []
 
+
+pda=PDA()
+print(pda.is_even_palindrome("ababba"))
