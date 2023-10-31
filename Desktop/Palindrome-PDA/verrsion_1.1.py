@@ -1,6 +1,6 @@
 import tkinter as tk
 import networkx as nx
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 
 class PDA:
     def __init__(self):
