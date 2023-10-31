@@ -5,7 +5,7 @@ class PDA:
         self.stack_alphabet = {'#', 'A', 'B'}
         self.transitions = {
             ('q0', 'a', '#'): ('q0', '#A'),
-            ('q0', 'b', '#'): ('q0', '#B'),
+            ('q0', 'b', '#'): ('q0', '#B'), 
             ('q0', 'b', 'B'): ('q0', 'BB'),
             ('q0', 'a', 'A'): ('q0', 'AA'),
             ('q0', 'a', 'B'): ('q0', 'BA'),
