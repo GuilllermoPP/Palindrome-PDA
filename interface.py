@@ -15,53 +15,48 @@ class PDAGraphicalInterface:
         self.pda = PDA()
         
         self.translator = Translator()
-        self.current_language = "en"  # Establece el idioma predeterminado
+        self.current_language = "en"
         
-        # Idiomas disponibles
         self.languages = {"es": "Spanish", "en": "English", "fr": "French"}
         
-        # Inicializa el motor de texto a voz
         self.init_text_to_speech()
         
-        # Crear un menú desplegable para seleccionar el idioma
+        # Create a dropdown menu to select the language
         self.language_label = ttk.Label(master, text=self.translate("Select a language:"))
         self.language_label.pack()
-       
         
         self.language_selector = ttk.Combobox(master, values=list(self.languages.values()), state="readonly")
         self.language_selector.current(0)
         self.language_selector.pack()
         self.language_selector.bind("<<ComboboxSelected>>", self.change_language)
         
+        # Speak to choose a language
+        self.speak_text(self.translate("Please select a language"))
+        
         self.input_label = tk.Label(master, text=self.translate("Enter an expression to validate if it's an even-length palindrome"))
         self.input_label.pack()
 
-        # Create an Entry for input
         self.input_entry = tk.Entry(self.master)
         self.input_entry.pack()
 
         self.result_label = tk.Label(master, text="")
         self.result_label.pack()
 
-        # Create a Button to trigger PDA evaluation
         self.evaluate_button = tk.Button(self.master, text=self.translate("VALIDATE"), command=self.validate_input)
         self.evaluate_button.pack()
-         # Create a Scale for controlling speed
+        
         self.speed_scale = Scale(self.master, label="", from_=1, to=10, orient=tk.HORIZONTAL)
-        self.speed_scale.set(5)  # Default speed
+        self.speed_scale.set(5)
         self.speed_scale.pack()
 
         self.evaluated_symbol = tk.Label(master, text="")
         self.evaluated_symbol.pack()
 
-        # Create a Canvas for drawing the PDA diagram
         self.canvas = Canvas(self.master, width=800, height=600)
         self.canvas.pack()
        
-        # Initialize visualization
         self.visualize_pda()
 
-        # Create a boolean flag to control the loop
         self.running = False
         
     def init_text_to_speech(self):
@@ -71,6 +66,9 @@ class PDAGraphicalInterface:
         selected_language = list(self.languages.keys())[list(self.languages.values()).index(self.language_selector.get())]
         self.current_language = selected_language
         self.update_ui_language()
+
+        # Solicitar entrada en el idioma seleccionado
+        self.speak_text(self.translate("Please enter an expression to validate if it's an even-length palindrome"))
 
     def update_ui_language(self):
         self.language_label.config(text=self.translate("Select a language:"))
