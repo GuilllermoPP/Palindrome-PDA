@@ -20,7 +20,7 @@ class PDA:
         self.accept_state = 'q2'
         self.current_state= self.initial_state 
         self.stack = ['#']
-        self.history = []
+        
 
     def transition(self, symbol):
         
@@ -32,25 +32,7 @@ class PDA:
             return True
         return False
 
-    def is_even_palindrome(self, input_string):
-        self.current_state = self.initial_state
-        length = len(input_string)
-        half_length = length // 2
-        
-
-        for i, symbol in enumerate(input_string):
-            
-            if not self.transition(symbol):
-                return False
-            if i == half_length -1: 
-                self.transition('')
-                
-                
-            
-        if self.stack[-1]=='#' and self.current_state == 'q1':
-            self.transition('')
-
-        return self.current_state == self.accept_state
+    
     
     def reset(self):
         """
@@ -58,8 +40,6 @@ class PDA:
         """
         self.current_state = self.initial_state
         self.stack = ['#']
-        self.history = []
+        
 
 
-pda=PDA()
-print(pda.is_even_palindrome("ababba"))

@@ -1,16 +1,21 @@
 import tkinter as tk
-from tkinter import Canvas
-import time
 
+import time
+from tkinter import Canvas, Scale
 from automaton_logic import PDA
 
 class PDAGraphicalInterface:
     def __init__(self, master):
         self.master = master
         self.master.title("PDA Visualization")
+
+
     
         # Create a PDA instance
         self.pda = PDA()
+
+        self.input_label = tk.Label(master, text="Ingrese una expresion para evaluar si es Palindromo de longitud par")
+        self.input_label.pack()
 
         # Create an Entry for input
         self.input_entry = tk.Entry(self.master)
@@ -22,11 +27,18 @@ class PDAGraphicalInterface:
         # Create a Button to trigger PDA evaluation
         self.evaluate_button = tk.Button(self.master, text="Evaluate", command=self.validate_input)
         self.evaluate_button.pack()
+         # Create a Scale for controlling speed
+        self.speed_scale = Scale(self.master, label="Speed", from_=1, to=10, orient=tk.HORIZONTAL)
+        self.speed_scale.set(5)  # Default speed
+        self.speed_scale.pack()
+
+        self.evaluated_symbol = tk.Label(master, text="")
+        self.evaluated_symbol.pack()
 
         # Create a Canvas for drawing the PDA diagram
         self.canvas = Canvas(self.master, width=800, height=600)
         self.canvas.pack()
-
+       
         # Initialize visualization
         self.visualize_pda()
 
@@ -39,8 +51,11 @@ class PDAGraphicalInterface:
         self.pda.reset()
         length = len(input_string)
         half_length = length // 2
+        evaluated_symbols = "simbolos evaluado: "
 
         for i, symbol in enumerate(input_string):
+            evaluated_symbols += symbol
+            self.evaluated_symbol.config(text=evaluated_symbols)
             self.update_visualization(symbol)
             if not self.pda.transition(symbol):
                 self.result_label.config(text="Rechazado")
@@ -50,11 +65,14 @@ class PDAGraphicalInterface:
                 self.update_visualization('')
                 self.pda.transition('')
 
+        self.check_final_state()
+
+    def check_final_state(self):
         if self.pda.stack[-1] == '#' and self.pda.current_state == 'q1':
             self.update_visualization('')
             self.pda.transition('')
 
-        self.update_visualization(symbol)
+        self.update_visualization('')
 
         if self.pda.current_state == self.pda.accept_state:
             self.result_label.config(text="Aceptado")
@@ -62,36 +80,47 @@ class PDAGraphicalInterface:
             self.result_label.config(text="Rechazado")
 
     def update_visualization(self, input_symbol):
+        speed = self.speed_scale.get()
         self.visualize_pda(input_symbol=input_symbol)
         self.master.update()
-        time.sleep(2)
+        time.sleep(5 / speed) 
+
+
 
     def visualize_pda(self, input_symbol=None):
-        # Clear the canvas before redrawing
+        self.clear_canvas()
+        self.draw_nodes()
+        self.draw_transitions(input_symbol)
+        self.draw_stack()
+
+    def clear_canvas(self):
         self.canvas.delete("all")
 
-        # Draw PDA nodes
+    def draw_nodes(self):
         for state in self.pda.states:
             x, y = self.get_node_coordinates(state)
-            fill_color = "lightgreen" if state==self.pda.current_state else "lightblue"
-            self.canvas.create_oval(x - 20, y - 20, x + 20, y + 20, fill=fill_color)
-            self.canvas.create_text(x, y, text=state)
+            fill_color = "lightgreen" if state == self.pda.current_state else "lightblue"
+            border_width = 3 if state == self.pda.accept_state else 1
+            self.draw_node(x, y, fill_color, state, border_width)
 
-        # Draw PDA transitions
+    def draw_node(self, x, y, fill_color, state, border_width):
+        self.canvas.create_oval(x - 20, y - 20, x + 20, y + 20, fill=fill_color, width=border_width)
+        self.canvas.create_text(x, y, text=state)
+
+    def draw_transitions(self, input_symbol):
         for transition, destination in self.pda.transitions.items():
             current_state, symbol, stack_symbol = transition
             new_state, push_symbols = destination
-            color = "red"  if current_state==self.pda.current_state and symbol==input_symbol and stack_symbol==self.pda.stack[-1]  else "black"
+            color = "red" if current_state == self.pda.current_state and symbol == input_symbol and stack_symbol == self.pda.stack[-1] else "black"
             self.draw_transition(current_state, new_state, f"{symbol if symbol != '' else 'λ'}, {stack_symbol} -> {''.join(push_symbols if push_symbols != '' else 'λ')}", color)
 
-        # Draw the PDA stack on the right side of the canvas
-        stack_text = "Stack:"
+    def draw_stack(self):
+        stack_text = "Pila:"
         for i, symbol in enumerate(self.pda.stack[::-1]):
             x, y = 600, 100 + i * 30
             self.canvas.create_rectangle(x - 15, y - 15, x + 15, y + 15, outline="black", fill="lightyellow")
             self.canvas.create_text(x, y, text=symbol, font=('Helvetica', 12), anchor=tk.CENTER)
 
-        # Draw the Stack title
         self.canvas.create_text(600, 100 + len(self.pda.stack) * 30 + 20, text=stack_text, font=('Helvetica', 12), anchor=tk.W)
 
     def draw_transition(self, current_state, new_state, label, color):
