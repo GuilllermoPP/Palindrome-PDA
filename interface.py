@@ -30,9 +30,6 @@ class PDAGraphicalInterface:
         self.language_selector.pack()
         self.language_selector.bind("<<ComboboxSelected>>", self.change_language)
         
-        # Speak to choose a language
-        self.speak_text(self.translate("Please select a language"))
-        
         self.input_label = tk.Label(master, text=self.translate("Enter an expression to validate if it's an even-length palindrome"))
         self.input_label.pack()
 
