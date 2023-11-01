@@ -20,7 +20,6 @@ class PDA:
         self.accept_state = 'q2'
         self.current_state= self.initial_state 
         self.stack = ['#']
-        
 
     def transition(self, symbol):
         
@@ -32,8 +31,6 @@ class PDA:
             return True
         return False
 
-    
-    
     def reset(self):
         """
         Reinicia los estados del autómata a su estado inicial.
@@ -41,5 +38,3 @@ class PDA:
         self.current_state = self.initial_state
         self.stack = ['#']
         
-
-
