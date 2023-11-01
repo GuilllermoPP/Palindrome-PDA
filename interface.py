@@ -1,20 +1,39 @@
 import tkinter as tk
-
+from tkinter import ttk
 import time
 from tkinter import Canvas, Scale
+from googletrans import Translator
 from automaton_logic import PDA
+import pyttsx3
 
 class PDAGraphicalInterface:
     def __init__(self, master):
         self.master = master
         self.master.title("PDA Visualization")
-
-
-    
+        
         # Create a PDA instance
         self.pda = PDA()
-
-        self.input_label = tk.Label(master, text="Ingrese una expresion para evaluar si es Palindromo de longitud par")
+        
+        self.translator = Translator()
+        self.current_language = "en"  # Establece el idioma predeterminado
+        
+        # Idiomas disponibles
+        self.languages = {"es": "Spanish", "en": "English", "fr": "French"}
+        
+        # Inicializa el motor de texto a voz
+        self.init_text_to_speech()
+        
+        # Crear un menú desplegable para seleccionar el idioma
+        self.language_label = ttk.Label(master, text=self.translate("Select a language:"))
+        self.language_label.pack()
+       
+        
+        self.language_selector = ttk.Combobox(master, values=list(self.languages.values()), state="readonly")
+        self.language_selector.current(0)
+        self.language_selector.pack()
+        self.language_selector.bind("<<ComboboxSelected>>", self.change_language)
+        
+        self.input_label = tk.Label(master, text=self.translate("Enter an expression to validate if it's an even-length palindrome"))
         self.input_label.pack()
 
         # Create an Entry for input
@@ -25,10 +44,10 @@ class PDAGraphicalInterface:
         self.result_label.pack()
 
         # Create a Button to trigger PDA evaluation
-        self.evaluate_button = tk.Button(self.master, text="Evaluate", command=self.validate_input)
+        self.evaluate_button = tk.Button(self.master, text=self.translate("VALIDATE"), command=self.validate_input)
         self.evaluate_button.pack()
          # Create a Scale for controlling speed
-        self.speed_scale = Scale(self.master, label="Speed", from_=1, to=10, orient=tk.HORIZONTAL)
+        self.speed_scale = Scale(self.master, label="", from_=1, to=10, orient=tk.HORIZONTAL)
         self.speed_scale.set(5)  # Default speed
         self.speed_scale.pack()
 
@@ -44,6 +63,19 @@ class PDAGraphicalInterface:
 
         # Create a boolean flag to control the loop
         self.running = False
+        
+    def init_text_to_speech(self):
+        self.engine = pyttsx3.init()
+
+    def change_language(self, event):
+        selected_language = list(self.languages.keys())[list(self.languages.values()).index(self.language_selector.get())]
+        self.current_language = selected_language
+        self.update_ui_language()
+
+    def update_ui_language(self):
+        self.language_label.config(text=self.translate("Select a language:"))
+        self.input_label.config(text=self.translate("Enter an expression to validate if it's an even-length palindrome"))
+        self.evaluate_button.config(text=self.translate("VALIDATE"))
 
     def validate_input(self):
         self.result_label.config(text="-")
@@ -51,14 +83,15 @@ class PDAGraphicalInterface:
         self.pda.reset()
         length = len(input_string)
         half_length = length // 2
-        evaluated_symbols = "simbolos evaluado: "
+        evaluated_symbols = self.translate("String Evaluation:\n" )
 
         for i, symbol in enumerate(input_string):
             evaluated_symbols += symbol
             self.evaluated_symbol.config(text=evaluated_symbols)
             self.update_visualization(symbol)
             if not self.pda.transition(symbol):
-                self.result_label.config(text="Rechazado")
+                self.result_label.config(text=self.translate("The expression is not a palindrome of even length\n"))
+                self.speak_text(self.translate("The expression is not a palindrome of even length"))
                 return
 
             if i == half_length - 1:
@@ -75,17 +108,17 @@ class PDAGraphicalInterface:
         self.update_visualization('')
 
         if self.pda.current_state == self.pda.accept_state:
-            self.result_label.config(text="Aceptado")
+            self.result_label.config(text=self.translate("The expression is a palindrome of even length\n"))
+            self.speak_text(self.translate("The expression is a palindrome of even length"))
         else:
-            self.result_label.config(text="Rechazado")
+            self.result_label.config(text=self.translate("The expression is not a palindrome of even length\n"))
+            self.speak_text(self.translate("The expression is not a palindrome of even length"))
 
     def update_visualization(self, input_symbol):
         speed = self.speed_scale.get()
         self.visualize_pda(input_symbol=input_symbol)
         self.master.update()
         time.sleep(5 / speed) 
-
-
 
     def visualize_pda(self, input_symbol=None):
         self.clear_canvas()
@@ -115,7 +148,7 @@ class PDAGraphicalInterface:
             self.draw_transition(current_state, new_state, f"{symbol if symbol != '' else 'λ'}, {stack_symbol} -> {''.join(push_symbols if push_symbols != '' else 'λ')}", color)
 
     def draw_stack(self):
-        stack_text = "Pila:"
+        stack_text = self.translate("Stack:")
         for i, symbol in enumerate(self.pda.stack[::-1]):
             x, y = 600, 100 + i * 30
             self.canvas.create_rectangle(x - 15, y - 15, x + 15, y + 15, outline="black", fill="lightyellow")
@@ -164,6 +197,13 @@ class PDAGraphicalInterface:
                 time.sleep(0.01)
             except tk.TclError:
                 break
+
+    def translate(self, text):
+        return self.translator.translate(text, src="en", dest=self.current_language).text
+
+    def speak_text(self, text):
+        self.engine.say(text)
+        self.engine.runAndWait()
 
 if __name__ == "__main__":
     root = tk.Tk()
